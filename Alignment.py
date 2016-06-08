@@ -35,8 +35,22 @@ def convert_to_mid_line_tabs(view, edit, tab_size, pt, length):
     return tabs_len - spaces_len
 
 
+class AlignmentCharsCommand(sublime_plugin.WindowCommand):
+    def run(self):
+        caption = "alignment_chars :"
+        initial_text = ""
+
+        def on_done(chars):
+            if initial_text == chars:
+                chars = None
+
+            self.window.run_command("alignment", {"chars" : chars})
+
+        self.window.show_input_panel(caption, initial_text, on_done, None, None)
+        
+
 class AlignmentCommand(sublime_plugin.TextCommand):
-    def run(self, edit):
+    def run(self, edit, **args):
         view = self.view
         sel = view.sel()
         max_col = 0
@@ -108,13 +122,16 @@ class AlignmentCommand(sublime_plugin.TextCommand):
             else:
                 perform_mid_line = True
 
-            alignment_chars = settings.get('alignment_chars')
+            alignment_chars = args.get("chars", None) or settings.get('alignment_chars')
+
             if alignment_chars == None:
                 alignment_chars = []
             alignment_prefix_chars = settings.get('alignment_prefix_chars')
             if alignment_prefix_chars == None:
                 alignment_prefix_chars = []
-            alignment_space_chars = settings.get('alignment_space_chars')
+
+            alignment_space_chars = args.get("chars", None) or settings.get('alignment_space_chars')
+            
             if alignment_space_chars == None:
                 alignment_space_chars = []
 
